@@ -1,19 +1,30 @@
+from pathlib import Path
 import numpy as np
 from dateutil import rrule
 from datetime import datetime, timedelta
 
-#convert Simon Carn's volcanic databse in files to be used in GEOS-5
-#SC has two files, one for explosive and one for degassing.
-#the one for degassing is only from 2005 to 2019. I extend it
-#with the 2005-2019 average before (1979-2004) and after (2020-)
+# convert Simon Carn's volcanic databse in files to be used in GEOS-5
+# SC has two files, one for explosive and one for degassing.
+# the one for degassing is only from 2005 to 2019. I extend it
+# with the 2005-2019 average before (1979-2004) and after (2020-)
+#
+# This version creates one directory, combining degassing and
+# explosive volcanoes in a single directory.
 
-#file = './toms_omi_inventory_data_jun2023.txt'
-file = './MSVOLSO2L4_20240108.txt'
-with open(file,'r') as f:
+################################################################
+# Configuration:
+################################################################
+explosive_file = './data/MSVOLSO2L4_20240108.txt'
+degassing_file = './data/so2_passive_degassing_2005-2019_20210715.txt'
+savepath = './volcanic_CARN_1978-2023_v202401/'
+
+################################################################
+# Explosive volcanoes
+################################################################
+with open(explosive_file,'r') as f:
     data = f.readlines()
     f.close()
 
-#explosive volcanoes
 name = []
 lat = []
 lon = []
@@ -41,9 +52,10 @@ for line in data[1:]:
     s = float(values[11])*1e6/2./86400.
     so2.append(s)
 
-#degassing volcanoes
-file = 'so2_passive_degassing_2005-2019_20210715.txt'
-with open (file,'r') as f:
+################################################################
+# Degassing volcanoes
+################################################################
+with open(degassing_file,'r') as f:
     data = f.readlines()
     f.close()
     nameD = []
@@ -68,12 +80,15 @@ EmD = np.array(annualEmD)*1e6/2./31536000. #shape (#volc, timesteps)
 #make time average of emissions
 avgEmD = np.mean(annualEmD,axis=-1)*1e6/2./31536000. #shape (#volc)
 
+################################################################
+# write
+################################################################
 dStart = datetime(1978,1,1)
 dEnd = datetime(2024,1,1)
 
 dayExStr = np.array([str(d) for d in dayEx])
 #write out files as Thomas database
-savepath = './volcanic_CARN_1978-2023_v202401/'
+Path(savepath).mkdir(exist_ok=True)
 for nd,dt in enumerate(rrule.rrule(rrule.DAILY, dtstart=dStart, until=dEnd)):
     dayString = str(dt.year)+str(dt.month).zfill(2)+str(dt.day).zfill(2)
     #find volcanoes on that day
@@ -100,7 +115,7 @@ for nd,dt in enumerate(rrule.rrule(rrule.DAILY, dtstart=dStart, until=dEnd)):
             print(dayString)
             print('---> found explosive volcanoes')
             print('---> '+name[v])
-        #check if there is observed height. If not use estimated
+            #check if there is observed height. If not use estimated
             if (p_alt_obs[v] < 0):
                 if (p_alt_est[v] >=0):
                     alt = p_alt_est[v]

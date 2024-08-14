@@ -1,3 +1,14 @@
+# Preparing Simon Carn's volcanic database for GEOS
+Convert Simon Carn's volcanic databases (both degassing + explosive) for use
+in GEOS. There are two python scripts, one creates a separate set of files for
+degassing and explosive while the other creates a combined set of files.
+
+## Changelog
+
+2024-08-14 Parker Case
+No longer Python 2.7
+All python has been made to work with python 3.x
+
 REQUIRES PYTHON 2.7!
 module load python/GEOSpyD/Ana2019.10_py2.7
 practically speaking it is only *TOGETHER.py that needs to be run
