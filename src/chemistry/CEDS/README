@@ -1,0 +1,5 @@
+This directory contains codes needed to prepare CEDS emissions for input into GEOS. Note that GOCART and GEOS CF differ in the format needed. 
+
+For GOCART:
+-A series of nco commands are used in CEDS-remap*.csh that combine non-energy sources into a single cariable an rename the variuables to be as expected by the model. This is the first step in the processing.
+-Next, grid.csh is run which uses lats4d to place the emissions on the appropriate grid.
