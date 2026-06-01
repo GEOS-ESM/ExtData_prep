@@ -3,7 +3,20 @@ Convert Simon Carn's volcanic databases (both degassing + explosive) for use
 in GEOS. There are two python scripts, one creates a separate set of files for
 degassing and explosive while the other creates a combined set of files.
 
+To run: update relevant parameters in the "Configuration" block near the head
+and then:
+% python convert_carn_to_geos_combined.py
+and/or 
+% python convert_carn_to_geos_separate.py
+
 ## Changelog
+2026-06-01 Peter Colarco
+Update to latest codes
+Add "data" directory
+- To data directory add example explosive database obtained from Krotkov/Carn
+  This is the table they provide directly
+- To data directory add example degassing database obtained from Krotkov/Carn
+  This is abstracted from the distributed XLS file and current through 2025
 
 2024-08-14 Parker Case
 No longer Python 2.7

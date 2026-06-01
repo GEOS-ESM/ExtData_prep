@@ -2,6 +2,7 @@ from pathlib import Path
 import numpy as np
 from dateutil import rrule
 from datetime import datetime, timedelta
+import sys
 
 # convert Simon Carn's volcanic databse in files to be used in GEOS-5
 # SC has two files, one for explosive and one for degassing.
@@ -14,11 +15,12 @@ from datetime import datetime, timedelta
 ################################################################
 # Configuration
 ################################################################
-explosive_file = './data/MSVOLSO2L4_20240108.txt'
-degassing_file = './data/so2_passive_degassing_2005-2019_20210715.txt'
-savepath_explosive = './volcanic_CARN_1978-2023_explosive_v202401/'
-savepath_degassing = './volcanic_CARN_1978-2023_degassing_v202401/'
-
+explosive_file = './data/MSVOLSO2L4_20260513.txt'
+degassing_file = './data/so2_passive_degassing_2005-2025_20260305.txt'
+savepath_explosive = './volcanic_CARN_1978-2026_explosive_v202606/'
+savepath_degassing = './volcanic_CARN_1978-2026_degassing_v202606/'
+dStart = datetime(1978,1,1)
+dEnd = datetime(2026,5,8)
 
 ################################################################
 # Explosive volcanoes
@@ -54,10 +56,8 @@ for line in data[1:]:
     s = float(values[11])*1e6/2./86400.
     so2.append(s)
 
-dStart = datetime(1978,1,1)
-dEnd = datetime(2024,1,1)
-
 dayExStr = np.array([str(d) for d in dayEx])
+
 #write out files as Thomas database
 Path(savepath_explosive).mkdir(exist_ok=True)
 for nd,dt in enumerate(rrule.rrule(rrule.DAILY, dtstart=dStart, until=dEnd)):
@@ -65,7 +65,7 @@ for nd,dt in enumerate(rrule.rrule(rrule.DAILY, dtstart=dStart, until=dEnd)):
     #find volcanoes on that day
     indexDay = np.where(dayExStr == dayString)
     if (len(indexDay[0]) > 0):
-        f = open(savepath_explosive+'so2_explosive_volcanic_emissions_Carns.'+dayString+'.rc','w')
+        f = open(savepath_explosive+'so2_explosive_volcanic_emissions_Carn.'+dayString+'.rc','w')
         f.write('###  LAT (-90,90), LON (-180,180), SULFUR [kg S/s], ELEVATION [m], CLOUD_COLUMN_HEIGHT [m]\n')
         f.write('### If elevation=cloud_column_height, emit in layer of elevation\n')
         f.write('### else, emit in top 1/3 of cloud_column_height\n')
@@ -98,16 +98,16 @@ with open(degassing_file,'r') as f:
     lonD = []
     elevD = []
     annualEmD = []
-    for nl,line in enumerate(data[2:-1]):
+    for nl,line in enumerate(data[0:-1]):
         values = line.split("\t")
         nameD.append(values[0])
         latD.append(float(values[1]))
         lonD.append(float(values[2]))
         elevD.append(float(values[3]))
-        tmp = [float(v) for v in values[4:19]]
+        tmp = [float(v) for v in values[4:25]]
         annualEmD.append(tmp)
 
-yearD = 2005+np.arange(15)
+yearD = 2005+np.arange(21)
 latD = np.array(latD)
 lonD = np.array(lonD)
 elevD = np.array(elevD)
@@ -121,24 +121,40 @@ dayExStr = np.array([str(d) for d in dayEx])
 Path(savepath_degassing).mkdir(exist_ok=True)
 for nd,dt in enumerate(rrule.rrule(rrule.DAILY, dtstart=dStart, until=dEnd)):
     dayString = str(dt.year)+str(dt.month).zfill(2)+str(dt.day).zfill(2)
-    if ((dt < datetime(2005,1,1) or (dt >= datetime(2020,1,1)))):
-        f = open(savepath_degassing+'so2_degassing_volcanic_emissions_Carns.'+dayString+'.rc','w')
+    print(dayString, dt.year, EmD.shape)
+#   Old way: average
+#    if ((dt < datetime(2005,1,1) or (dt >= datetime(2020,1,1)))):
+#        f = open(savepath_degassing+'so2_degassing_volcanic_emissions_Carn.'+dayString+'.rc','w')
+#        f.write('###  LAT (-90,90), LON (-180,180), SULFUR [kg S/s], ELEVATION [m], CLOUD_COLUMN_HEIGHT [m]\n')
+#        f.write('### If elevation=cloud_column_height, emit in layer of elevation\n')
+#        f.write('### else, emit in top 1/3 of cloud_column_height\n')
+#        f.write('volcano::\n')
+#        string = '{:.3f} {:.3f} {:e} {:.0f} {:.0f} {:06.0f} {:06.0f} \n'
+#        for nv,vv in enumerate(nameD):
+#            f.write(string.format(latD[nv], lonD[nv], avgEmD[nv], elevD[nv], elevD[nv], 0, 240000))
+#        f.write('::\n')
+#        f.close()
+    if ((dt < datetime(2005,1,1) or (dt >= datetime(2026,1,1)))):
+        f = open(savepath_degassing+'so2_degassing_volcanic_emissions_Carn.'+dayString+'.rc','w')
         f.write('###  LAT (-90,90), LON (-180,180), SULFUR [kg S/s], ELEVATION [m], CLOUD_COLUMN_HEIGHT [m]\n')
         f.write('### If elevation=cloud_column_height, emit in layer of elevation\n')
         f.write('### else, emit in top 1/3 of cloud_column_height\n')
         f.write('volcano::\n')
         string = '{:.3f} {:.3f} {:e} {:.0f} {:.0f} {:06.0f} {:06.0f} \n'
         for nv,vv in enumerate(nameD):
-            f.write(string.format(latD[nv], lonD[nv], avgEmD[nv], elevD[nv], elevD[nv], 0, 240000))
+            if(dt < datetime(2005,1,1)):
+                f.write(string.format(latD[nv], lonD[nv], EmD[nv,0], elevD[nv], elevD[nv], 0, 240000))
+            else:
+                f.write(string.format(latD[nv], lonD[nv], EmD[nv,-1], elevD[nv], elevD[nv], 0, 240000))
         f.write('::\n')
         f.close()
     else:
-        f = open(savepath_degassing+'so2_degassing_volcanic_emissions_Carns.'+dayString+'.rc','w')
+        f = open(savepath_degassing+'so2_degassing_volcanic_emissions_Carn.'+dayString+'.rc','w')
         f.write('###  LAT (-90,90), LON (-180,180), SULFUR [kg S/s], ELEVATION [m], CLOUD_COLUMN_HEIGHT [m]\n')
         f.write('### If elevation=cloud_column_height, emit in layer of elevation\n')
         f.write('### else, emit in top 1/3 of cloud_column_height\n')
         f.write('volcano::\n')
-        string = '{:.3f} {:.3f} {:e} {:.0f} {:.0f} \n'
+        string = '{:.3f} {:.3f} {:e} {:.0f} {:.0f} {:06.0f} {:06.0f} \n'
         for nv,vv in enumerate(nameD):
             f.write(string.format(latD[nv], lonD[nv],EmD[nv,dt.year-2005],elevD[nv], elevD[nv], 0, 240000))
         f.write('::\n')
