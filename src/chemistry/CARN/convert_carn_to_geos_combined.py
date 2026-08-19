@@ -14,9 +14,11 @@ from datetime import datetime, timedelta
 ################################################################
 # Configuration:
 ################################################################
-explosive_file = './data/MSVOLSO2L4_20240108.txt'
-degassing_file = './data/so2_passive_degassing_2005-2019_20210715.txt'
-savepath = './volcanic_CARN_1978-2023_v202401/'
+explosive_file = './data/MSVOLSO2L4_20260810.txt'
+degassing_file = './data/so2_passive_degassing_2005-2025_20260305.txt'
+savepath = './volcanic_CARN_1978-2026_v202607/'
+dStart = datetime(1978,1,1)
+dEnd = datetime(2026,7,31)
 
 ################################################################
 # Explosive volcanoes
@@ -63,13 +65,13 @@ with open(degassing_file,'r') as f:
     lonD = []
     elevD = []
     annualEmD = []
-    for nl,line in enumerate(data[2:-1]):
+    for nl,line in enumerate(data[0:-1]):
         values = line.split("\t")
         nameD.append(values[0])
         latD.append(float(values[1]))
         lonD.append(float(values[2]))
         elevD.append(float(values[3]))
-        tmp = [float(v) for v in values[4:19]]
+        tmp = [float(v) for v in values[4:25]]
         annualEmD.append(tmp)
 
 latD = np.array(latD)
@@ -83,8 +85,6 @@ avgEmD = np.mean(annualEmD,axis=-1)*1e6/2./31536000. #shape (#volc)
 ################################################################
 # write
 ################################################################
-dStart = datetime(1978,1,1)
-dEnd = datetime(2024,1,1)
 
 dayExStr = np.array([str(d) for d in dayEx])
 #write out files as Thomas database
@@ -93,15 +93,26 @@ for nd,dt in enumerate(rrule.rrule(rrule.DAILY, dtstart=dStart, until=dEnd)):
     dayString = str(dt.year)+str(dt.month).zfill(2)+str(dt.day).zfill(2)
     #find volcanoes on that day
     indexDay = np.where(dayExStr == dayString)
-    f = open(savepath+'so2_volcanic_emissions_Carns.'+dayString+'.rc','w')
-    if ((dt < datetime(2005,1,1) or (dt >= datetime(2020,1,1)))):
+    f = open(savepath+'so2_volcanic_emissions_Carn.'+dayString+'.rc','w')
+#    if ((dt < datetime(2005,1,1) or (dt >= datetime(2020,1,1)))):
+#        f.write('###  LAT (-90,90), LON (-180,180), SULFUR [kg S/s], ELEVATION [m], CLOUD_COLUMN_HEIGHT [m]\n')
+#        f.write('### If elevation=cloud_column_height, emit in layer of elevation\n')
+#        f.write('### else, emit in top 1/3 of cloud_column_height\n')
+#        f.write('volcano::\n')
+#        string = '{:.3f} {:.3f} {:e} {:.0f} {:.0f} {:06.0f} {:06.0f} \n'
+#        for nv,vv in enumerate(nameD):
+#            f.write(string.format(latD[nv], lonD[nv], avgEmD[nv], elevD[nv], elevD[nv], 0, 240000))
+    if ((dt < datetime(2005,1,1) or (dt >= datetime(2026,1,1)))):
         f.write('###  LAT (-90,90), LON (-180,180), SULFUR [kg S/s], ELEVATION [m], CLOUD_COLUMN_HEIGHT [m]\n')
         f.write('### If elevation=cloud_column_height, emit in layer of elevation\n')
         f.write('### else, emit in top 1/3 of cloud_column_height\n')
         f.write('volcano::\n')
         string = '{:.3f} {:.3f} {:e} {:.0f} {:.0f} {:06.0f} {:06.0f} \n'
         for nv,vv in enumerate(nameD):
-            f.write(string.format(latD[nv], lonD[nv], avgEmD[nv], elevD[nv], elevD[nv], 0, 240000))
+            if(dt < datetime(2005,1,1)):
+                f.write(string.format(latD[nv], lonD[nv], EmD[nv,0], elevD[nv], elevD[nv], 0, 240000))
+            else:
+                f.write(string.format(latD[nv], lonD[nv], EmD[nv,-1], elevD[nv], elevD[nv], 0, 240000))
     else:
         f.write('###  LAT (-90,90), LON (-180,180), SULFUR [kg S/s], ELEVATION [m], CLOUD_COLUMN_HEIGHT [m]\n')
         f.write('### If elevation=cloud_column_height, emit in layer of elevation\n')

@@ -1,9 +1,44 @@
 # Preparing Simon Carn's volcanic database for GEOS
 Convert Simon Carn's volcanic databases (both degassing + explosive) for use
 in GEOS. There are two python scripts, one creates a separate set of files for
-degassing and explosive while the other creates a combined set of files.
+degassing and explosive while the other creates a combined set of files. A
+third python script is suitable for a simple plot of the database.
 
 ## Changelog
+
+2026-08-18 Peter Colarco
+I copied from latest from Simon Carn and Nick Krotkov
+(db version MSVOLSO2L4_20260810.txt) which is a complete
+database and I process to only accumulate files (here)
+since the last update. Files are available for period
+May 9, 2026 - July 31, 2026
+
+2026-06-04 Peter Colarco
+I copied from latest from Simon Carn and Nick Krotkov
+(db version MSVOLSO2L4_20260513.txt) which is a complete
+database and I process to only accumulate files (here)
+since the last update. Files are available for period
+January 30, 2026 - May 8, 2026
+
+2026-03-05 Peter Colarco
+Refactor how we do the degassing volcanic eruptions.
+Update base database to Catalogue_SO2_2025.xls from:
+https://so2.gsfc.nasa.gov/kml/Catalogue_SO2_2025.xls
+Use the first tab in spreadsheet (Catalogue) and copy
+to last sheet Catalogue_Volcano then sort by TYPE and
+remove all but volcanoes and then clean up the format
+a bit (restrict lat/lon to XXX.YYY format and put
+"_" in names with spaces and save as text delimited
+file: so2_passive_degassing_2005-2025_20260305.txt
+New rule is to write dates prior to 2005 with 2005
+annual data and dates after 2025 with 2025 data.
+
+2026-02-02 Peter Colarco
+Updated to most recent database from:
+https://so2.gsfc.nasa.gov/eruptions/MSVOLSO2L4_20260129.txt
+valid until 20260129
+NB: the degassing file we have provided to M21C is based on 2020 degassing fields
+
 
 2024-08-14 Parker Case
 No longer Python 2.7
