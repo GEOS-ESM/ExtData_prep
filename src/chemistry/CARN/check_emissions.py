@@ -119,4 +119,5 @@ if __name__ == "__main__":
 #    plot_time("20000101","20260501")
 #    plot_time("20000101","20260101",dir="/home/pcolarco/ExtData/chemistry/CARN/v202401/sfc", label="MERRA21C")
     plot_time("20200101","20260501")
+    plot_time("20200101","20260731",dir="/home/pcolarco/silo/fvInput/sfc/volcano18/volcanic_CARN_1978-2026_v202607")
     plot_time("20200101","20260101",dir="/home/pcolarco/ExtData/chemistry/CARN/v202401/sfc", label="MERRA21C")

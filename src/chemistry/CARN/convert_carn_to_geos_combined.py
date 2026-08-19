@@ -14,11 +14,11 @@ from datetime import datetime, timedelta
 ################################################################
 # Configuration:
 ################################################################
-explosive_file = './data/MSVOLSO2L4_20260513.txt'
+explosive_file = './data/MSVOLSO2L4_20260810.txt'
 degassing_file = './data/so2_passive_degassing_2005-2025_20260305.txt'
-savepath = './volcanic_CARN_1978-2026_v202606/'
+savepath = './volcanic_CARN_1978-2026_v202607/'
 dStart = datetime(1978,1,1)
-dEnd = datetime(2026,5,8)
+dEnd = datetime(2026,7,31)
 
 ################################################################
 # Explosive volcanoes
